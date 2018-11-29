@@ -50,7 +50,9 @@ public class OvrAvatarTouchController : MonoBehaviour
                  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, controller) > 0.7f)
         {
             zoomPlane.transform.localScale =
-                new Vector3(((this.transform.position.x - otherController.transform.position.x) * 0.3f), 0.05f, 0.1f);
+                new Vector3(((this.transform.position.x - otherController.transform.position.x) * 0.3f),
+                    0.05f,
+                    ((this.transform.position.x - otherController.transform.position.x) * 0.3f));
         }
         else 
         {

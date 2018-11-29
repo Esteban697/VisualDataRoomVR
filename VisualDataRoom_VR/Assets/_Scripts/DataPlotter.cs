@@ -6,7 +6,7 @@ using VRTK;
 
 public class DataPlotter : MonoBehaviour
 {
-
+    
     // Name of the input CSV file, no extension
     public string inputfile;
 
@@ -22,7 +22,7 @@ public class DataPlotter : MonoBehaviour
     public string xName;
     public string yName;
     public string zName;
-
+    
     //Scale of the scatter plot
     public float plotScale = 10.0f;
 
@@ -42,108 +42,114 @@ public class DataPlotter : MonoBehaviour
     public GameObject Controllerhand;
 
     // Use this for initialization
-    void Start()
+    void Update()
     {
-        // Set pointlist to results of function Reader with argument inputfile
-        pointList = CSVReader.Read(inputfile);
-
-        //Log to console
-        Debug.Log(pointList);
-
-        // Declare list of strings, fill with keys (column names)
-        List<string> columnList = new List<string>(pointList[1].Keys);
-
-        // Print number of keys (using .count)
-        Debug.Log("There are " + columnList.Count + " columns in the CSV");
-
-        foreach (string key in columnList)
-            Debug.Log("Column name is " + key);
-
-        // Assign column name from columnList to Name variables
-        xName = columnList[columnX];
-        yName = columnList[columnY];
-        zName = columnList[columnZ];
-
-        // Get maxes of each axis
-        float xMax = FindMaxValue(xName);
-        float yMax = FindMaxValue(yName);
-        float zMax = FindMaxValue(zName);
-
-        // Get minimums of each axis
-        float xMin = FindMinValue(xName);
-        float yMin = FindMinValue(yName);
-        float zMin = FindMinValue(zName);
-
-        //float Xadj = (xMax - xMin) / 2 * xMax;
-        //float Yadj = (yMax - xMin) / 2 * yMax;
-        //float Zadj = (zMax - xMin) / 2 * zMax;
-        float Xadj = 0.0f;
-        float Yadj = 0.0f;
-        float Zadj = 0.0f;
-        //Debug.Log("This are"+Xadj+ Yadj+ Zadj);
-
-        //Remove the previous plot if executed before
-
-        if (plotted == true)
+        Controllerhand = GameObject.Find("LeftController");
+        if (Controllerhand.GetComponent<VRTK_ControllerEvents>().triggerPressed)
         {
+            
+            
+            // Set pointlist to results of function Reader with argument inputfile
+            pointList = CSVReader.Read(inputfile);
 
+            //Log to console
+            Debug.Log(pointList);
+
+            // Declare list of strings, fill with keys (column names)
+            List<string> columnList = new List<string>(pointList[1].Keys);
+
+            // Print number of keys (using .count)
+            Debug.Log("There are " + columnList.Count + " columns in the CSV");
+
+            foreach (string key in columnList)
+                Debug.Log("Column name is " + key);
+
+            // Assign column name from columnList to Name variables
+            xName = columnList[columnX];
+            yName = columnList[columnY];
+            zName = columnList[columnZ];
+
+            // Get maxes of each axis
+            float xMax = FindMaxValue(xName);
+            float yMax = FindMaxValue(yName);
+            float zMax = FindMaxValue(zName);
+
+            // Get minimums of each axis
+            float xMin = FindMinValue(xName);
+            float yMin = FindMinValue(yName);
+            float zMin = FindMinValue(zName);
+
+            //float Xadj = (xMax - xMin) / 2 * xMax;
+            //float Yadj = (yMax - xMin) / 2 * yMax;
+            //float Zadj = (zMax - xMin) / 2 * zMax;
+            float Xadj = 0.0f;
+            float Yadj = 0.0f;
+            float Zadj = 0.0f;
+            //Debug.Log("This are"+Xadj+ Yadj+ Zadj);
+
+            //Remove the previous plot if executed before
+           
+            if (plotted == true)
+            {
+
+                for (var i = 0; i < pointList.Count; i++)
+                {
+                    // Assigns original values to dataPointName
+                    string dataPointNameused =
+                        pointList[i][xName] + " "
+                        + pointList[i][yName] + " "
+                        + pointList[i][zName];
+
+                    GameObject dataPointToDelete = GameObject.Find(dataPointNameused);
+                    Destroy(dataPointToDelete);
+                }
+            }
+
+            //Loop through Pointlist
             for (var i = 0; i < pointList.Count; i++)
             {
+                // Get value in poinList at ith "row", in "column" Name, normalize
+                float x =
+                    ((System.Convert.ToSingle(pointList[i][xName]) - xMin)
+                    / (xMax - xMin)) - Xadj;
+
+                float y =
+                    ((System.Convert.ToSingle(pointList[i][yName]) - yMin)
+                    / (yMax - yMin)) - Yadj;
+
+                float z =
+                    ((System.Convert.ToSingle(pointList[i][zName]) - zMin)
+                    / (zMax - zMin)) - Zadj;
+
+                Debug.Log(new Vector3(xMax - xMin, yMax - yMin, zMax - zMin));
+
+
+                // Instantiate as gameobject variable so that it can be manipulated within loop
+                GameObject dataPoint = Instantiate(
+                        PointPrefab,
+                        (new Vector3(x, y, z) + pointAdjust) * plotScale,
+                        Quaternion.identity);
+
+                // Make child of PointHolder object, to keep points within container in hiearchy
+                dataPoint.transform.parent = PointHolder.transform;
+
                 // Assigns original values to dataPointName
-                string dataPointNameused =
+                string dataPointName =
                     pointList[i][xName] + " "
                     + pointList[i][yName] + " "
                     + pointList[i][zName];
 
-                GameObject dataPointToDelete = GameObject.Find(dataPointNameused);
-                Destroy(dataPointToDelete);
+                // Assigns name to the prefab
+                dataPoint.transform.name = dataPointName;
+
+                // Gets material color and sets it to a new RGB color we define
+                dataPoint.GetComponent<Renderer>().material.color =
+                    new Color(x, y, z, 1.0f);
             }
+
+            //Switch boolean because it is plotted
+            plotted = true;
         }
-
-        //Loop through Pointlist
-        for (var i = 0; i < pointList.Count; i++)
-        {
-            // Get value in poinList at ith "row", in "column" Name, normalize
-            float x =
-                ((System.Convert.ToSingle(pointList[i][xName]) - xMin)
-                / (xMax - xMin)) - Xadj;
-
-            float y =
-                ((System.Convert.ToSingle(pointList[i][yName]) - yMin)
-                / (yMax - yMin)) - Yadj;
-
-            float z =
-                ((System.Convert.ToSingle(pointList[i][zName]) - zMin)
-                / (zMax - zMin)) - Zadj;
-
-            Debug.Log(new Vector3(xMax - xMin, yMax - yMin, zMax - zMin));
-
-
-            // Instantiate as gameobject variable so that it can be manipulated within loop
-            GameObject dataPoint = Instantiate(
-                    PointPrefab,
-                    (new Vector3(x, y, z) + pointAdjust) * plotScale,
-                    Quaternion.identity);
-
-            // Make child of PointHolder object, to keep points within container in hiearchy
-            dataPoint.transform.parent = PointHolder.transform;
-
-            // Assigns original values to dataPointName
-            string dataPointName =
-                pointList[i][xName] + " "
-                + pointList[i][yName] + " "
-                + pointList[i][zName];
-
-            // Assigns name to the prefab
-            dataPoint.transform.name = dataPointName;
-
-            // Gets material color and sets it to a new RGB color we define
-            dataPoint.GetComponent<Renderer>().material.color =
-                new Color(x, y, z, 1.0f);
-        }
-
-        //Switch boolean because it is plotted
-        plotted = true;
     }
 
     private float FindMaxValue(string columnName)
