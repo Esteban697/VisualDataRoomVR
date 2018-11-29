@@ -16,6 +16,7 @@ TagManager:
   - SnapCylinder
   - SnapSaucer
   - Head
+  - Thumbs
   layers:
   - Default
   - TransparentFX
