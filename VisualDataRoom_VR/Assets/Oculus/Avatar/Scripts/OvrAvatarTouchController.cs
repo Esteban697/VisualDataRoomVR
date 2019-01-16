@@ -7,13 +7,19 @@ public class OvrAvatarTouchController : MonoBehaviour
     public GameObject example;
     public OVRInput.Controller controller;
     public ThumbCollider thumbCollider;
-    public bool zoomPlaneActive = false;
     public GameObject zoomPlane;
     public GameObject otherController;
+    public GameObject objectToChange;
+    public Transform objectTransform;
+    public bool zoomInOn = false;
 
-    void Update()
+    void Start()
     {
-
+        
+    }
+        void Update()
+    {
+        //Detection of the index finger position
         if (!OVRInput.Get(OVRInput.NearTouch.PrimaryIndexTrigger, controller))
         {
             if ((controller & OVRInput.Controller.LTouch) != 0)
@@ -21,6 +27,7 @@ public class OvrAvatarTouchController : MonoBehaviour
             if ((controller & OVRInput.Controller.RTouch) != 0)
                 example.transform.position -= Vector3.up * 0.01f;
         }
+        //Detection of the thumb finger position
         if (!OVRInput.Get(OVRInput.NearTouch.PrimaryThumbButtons, controller))
         {
             if ((controller & OVRInput.Controller.LTouch) != 0)
@@ -36,14 +43,16 @@ public class OvrAvatarTouchController : MonoBehaviour
             if ((controller & OVRInput.Controller.RTouch) != 0)
                 example.transform.position -= Vector3.left * 0.01f;
         }
-
-
+        
+        
+        //Detection of "corner gesture": thumb and index up with grip pressed
         if (!OVRInput.Get(OVRInput.NearTouch.PrimaryThumbButtons, controller) &&
             !OVRInput.Get(OVRInput.NearTouch.PrimaryIndexTrigger, controller) &&
             OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, controller) > 0.7f && thumbCollider.thumbsAlligned)
         {
-            zoomPlaneActive = true;
             zoomPlane.SetActive(true);
+            objectTransform.localScale = objectToChange.transform.localScale;
+            zoomInOn = true;
         }
         else if (!OVRInput.Get(OVRInput.NearTouch.PrimaryThumbButtons, controller) &&
                  !OVRInput.Get(OVRInput.NearTouch.PrimaryIndexTrigger, controller) &&
@@ -53,11 +62,20 @@ public class OvrAvatarTouchController : MonoBehaviour
                 new Vector3(((this.transform.position.x - otherController.transform.position.x) * 0.3f),
                     0.05f,
                     ((this.transform.position.x - otherController.transform.position.x) * 0.3f));
+
+            objectTransform.localScale =
+                new Vector3(objectTransform.localScale.x + ((Mathf.Abs(this.transform.position.x - otherController.transform.position.x) * 0.01f)),
+                        objectTransform.localScale.y + ((Mathf.Abs(this.transform.position.x - otherController.transform.position.x) * 0.01f)),
+                        objectTransform.localScale.z + ((Mathf.Abs(this.transform.position.x - otherController.transform.position.x) * 0.01f)));
+            if (zoomInOn == true)
+            {
+                objectToChange.transform.localScale = objectTransform.localScale;
+            }
         }
         else 
         {
-            zoomPlaneActive = false;
             zoomPlane.SetActive(false);
+            zoomInOn = false;
         }
     }
 }
