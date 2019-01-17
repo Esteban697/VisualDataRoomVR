@@ -8,6 +8,7 @@ public class OvrAvatarTouchController : MonoBehaviour
     public OVRInput.Controller controller;
     public ThumbCollider thumbCollider;
     public GameObject zoomPlane;
+    public GameObject zoomPlanePosition;
     public GameObject otherController;
     public GameObject objectToChange;
     public Transform objectTransform;
@@ -50,7 +51,9 @@ public class OvrAvatarTouchController : MonoBehaviour
             !OVRInput.Get(OVRInput.NearTouch.PrimaryIndexTrigger, controller) &&
             OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, controller) > 0.7f && thumbCollider.thumbsAlligned)
         {
-            zoomPlane.SetActive(true);
+            zoomPlanePosition.transform.SetParent(objectToChange.transform);
+            zoomPlanePosition.transform.localPosition = (Vector3.down * objectToChange.transform.localScale.x * 1.5f);
+            zoomPlanePosition.SetActive(true);
             objectTransform.localScale = objectToChange.transform.localScale;
             zoomInOn = true;
         }
@@ -59,9 +62,9 @@ public class OvrAvatarTouchController : MonoBehaviour
                  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, controller) > 0.7f)
         {
             zoomPlane.transform.localScale =
-                new Vector3(((this.transform.position.x - otherController.transform.position.x) * 0.3f),
+                new Vector3((Mathf.Abs(this.transform.position.x - otherController.transform.position.x) * 0.9f),
                     0.05f,
-                    ((this.transform.position.x - otherController.transform.position.x) * 0.3f));
+                    (Mathf.Abs(this.transform.position.x - otherController.transform.position.x) * 0.9f));
 
             objectTransform.localScale =
                 new Vector3(objectTransform.localScale.x + ((Mathf.Abs(this.transform.position.x - otherController.transform.position.x) * 0.01f)),
@@ -74,7 +77,7 @@ public class OvrAvatarTouchController : MonoBehaviour
         }
         else 
         {
-            zoomPlane.SetActive(false);
+            zoomPlanePosition.SetActive(false);
             zoomInOn = false;
         }
     }
