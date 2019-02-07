@@ -224,6 +224,14 @@ Prefab:
       propertyPath: palmCollider
       value: 
       objectReference: {fileID: 844718277}
+    - target: {fileID: 11405130, guid: 84c8b8609f9bb434eaf5248f17ff1293, type: 2}
+      propertyPath: otherControllerScript
+      value: 
+      objectReference: {fileID: 1962723308}
+    - target: {fileID: 11477770, guid: 84c8b8609f9bb434eaf5248f17ff1293, type: 2}
+      propertyPath: otherControllerScript
+      value: 
+      objectReference: {fileID: 1236792362}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 84c8b8609f9bb434eaf5248f17ff1293, type: 2}
   m_IsPrefabAsset: 0
@@ -895,7 +903,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1671387687
 Transform:
   m_ObjectHideFlags: 0
